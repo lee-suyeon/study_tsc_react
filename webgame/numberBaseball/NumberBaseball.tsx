@@ -56,7 +56,7 @@ function NumberBaseball() {
         })
       }
     }
-  }, []);
+  }, [value, answer]);
 
   return (
     <div>
