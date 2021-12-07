@@ -1,0 +1,30 @@
+/* ResponseCheck */
+
+#screen {
+  width: 600px;
+  height: 400px;
+  padding: 150px 15px;
+  box-sizing: border-box;
+  text-align: center;
+  color: white;
+  font-size: 40px;
+  font-weight: 500;
+  user-select: none; /*block X*/
+}
+
+#screen .average {
+  margin: 20px;
+  font-size: 20px;
+}
+
+#screen.waiting {
+  background-color: cornflowerblue;
+}
+
+#screen.ready {
+  background-color: tomato;
+}
+
+#screen.now {
+  background-color: seagreen;
+}
