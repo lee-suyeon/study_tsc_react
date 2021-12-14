@@ -23,12 +23,12 @@ const computerChoice = (imgCoords: ImgCoords) => {
 
 const RSP = () => {
   const[result, setResult] = useState('');
-  const[imgCoord, setImgCoord] = useState(rspCoords.rock);
+  const[imgCoord, setImgCoord] = useState<ImgCoords>(rspCoords.rock);
   const[score, setScore] = useState(0);
   const interval = useRef<number>();
 
   useEffect(() => {
-    interval.current = setInterval(changeHand, 200);
+    interval.current = window.setInterval(changeHand, 200);
     return () => {
       clearInterval(interval.current);
     }
@@ -44,7 +44,7 @@ const RSP = () => {
     }
   }
 
-  const onClickBtn = (choice) => () => {
+  const onClickBtn = (choice: keyof typeof rspCoords) => () => {
     clearInterval(interval.current);
     const myScore = scores[choice];
     const cpuScore = scores[computerChoice(imgCoord)];
@@ -59,18 +59,18 @@ const RSP = () => {
       setScore((prevScore) => prevScore - 1);
     }
     setTimeout(() => {
-      interval.current = setInterval(changeHand, 200);
+      interval.current = window.setInterval(changeHand, 200);
     }, 1000)
   };
 
 
   return (
     <div id="RPS">
-      <div id="computer" style={{ background: `url(https://en.pimg.jp/023/182/267/1/23182267.jpg) ${imgCoord} 0 `}}></div>
+      <div id="computer" style={{ height: '200px', background: `url(https://en.pimg.jp/023/182/267/1/23182267.jpg) ${imgCoord} 0 `}}></div>
       <div>
         <button id="rock" className="btn" onClick={onClickBtn('rock')}>바위</button>
         <button id="scissor" className="btn" onClick={onClickBtn('scissors')}>가위</button>
-        <button id="paper" className="btn" onClick={onClickBtn('papper')}>보</button>
+        <button id="paper" className="btn" onClick={onClickBtn('paper')}>보</button>
       </div>
       <div>{result}</div>
       <div>현재 : {score}점</div>
