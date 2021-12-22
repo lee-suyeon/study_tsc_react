@@ -56,7 +56,7 @@ interface ResetGameAction {
   recentCell: [number, number];
 }
 
-type ReducerActions = SetWinnerAction | ClickCellAction | ChangeTurnAction | ResetGameAction
+type ReducerActions = SetWinnerAction | ClickCellAction | ChangeTurnAction | ResetGameAction;
 
 const reducer = (state: ReducerState, action: ReducerActions ): ReducerState => {
   switch (action.type) {
@@ -101,6 +101,44 @@ const reducer = (state: ReducerState, action: ReducerActions ): ReducerState => 
 const TicTacToe = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { tableData, turn, winner, recentCell } = state;
+
+  useEffect(() => { // winner check effect
+    const [row, cell] = recentCell;
+    if (row < 0) {
+      return;
+    }
+    let win = false;
+    if (tableData[row][0] === turn && tableData[row][1] === turn && tableData[row][2] === turn) {
+      win = true;
+    }
+    if (tableData[0][cell] === turn && tableData[1][cell] === turn && tableData[2][cell] === turn) {
+      win = true;
+    }
+    if (tableData[0][0] === turn && tableData[1][1] === turn && tableData[2][2] === turn) {
+      win = true;
+    }
+    if (tableData[0][2] === turn && tableData[1][1] === turn && tableData[2][0] === turn) {
+      win = true;
+    }
+    if (win) {
+      dispatch({ type: SET_WINNER, winner: turn });
+      dispatch({ type: RESET_GAME });
+    } else {
+      let all = true; // draw
+      tableData.forEach((row) => { // draw check
+        row.forEach((cell) => {
+          if (!cell) { // empty cell check
+            all = false;
+          }
+        });
+      });
+      if (all) {
+        dispatch({ type: RESET_GAME });
+      } else {
+        dispatch({ type: CHANGE_TURN });
+      }
+    }
+  }, [recentCell])
 
   const onClickTable = useCallback(() => {
     dispatch({ type: SET_WINNER, winner: 'O' });
