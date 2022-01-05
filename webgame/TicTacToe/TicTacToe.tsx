@@ -46,14 +46,10 @@ const clickCell = (row: number, cell: number): ClickCellAction => {
 
 interface ChangeTurnAction {
   type: typeof CHANGE_TURN;
-  turn: 'O' | 'X';
 }
 
 interface ResetGameAction {
   type: typeof RESET_GAME;
-  turn: 'O' | 'X';
-  tableData: String[][];
-  recentCell: [number, number];
 }
 
 type ReducerActions = SetWinnerAction | ClickCellAction | ChangeTurnAction | ResetGameAction;
@@ -138,7 +134,7 @@ const TicTacToe = () => {
         dispatch({ type: CHANGE_TURN });
       }
     }
-  }, [recentCell])
+  }, [recentCell]) 
 
   const onClickTable = useCallback(() => {
     dispatch({ type: SET_WINNER, winner: 'O' });

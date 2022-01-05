@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dispatch, FunctionComponent, useMemo } from 'react';
+import { Dispatch, FunctionComponent, useMemo, memo } from 'react';
 import Td from './Td';
 
 interface Props {
@@ -8,17 +8,17 @@ interface Props {
   dispatch: Dispatch<any>;
 }
 
-const Tr:FunctionComponent<Props> = ({ rowData, rowIndex, dispatch }) => {
+const Tr:FunctionComponent<Props> = memo(({ rowData, rowIndex, dispatch }) => {
   return (
     <tr>
        {Array(rowData.length).fill(null).map((td, i) => (
         useMemo(
-          () => <Td key={i} dispatch={dispatch} rowIndex={rowIndex} cellData={rowData[i]} >{' '}</Td>,
+          () => <Td key={i} dispatch={dispatch} rowIndex={rowIndex} cellIndex={i} cellData={rowData[i]} >{' '}</Td>,
           [rowData[i]]
         )
       ))}
     </tr>
   )
-}
+});
 
 export default Tr;
