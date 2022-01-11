@@ -27,10 +27,10 @@ export const RESET_GAME = 'RESET_GAME' as const;
 
 interface SetWinnerAction {
   type: typeof SET_WINNER;
-  winner: 'O' | 'X';
+  winner: 'O' | 'X' | '';
 }
 
-const setWinner = (winner: 'O' | 'X'): SetWinnerAction => {
+const setWinner = (winner: 'O' | 'X' | ''): SetWinnerAction => {
   return { type: SET_WINNER, winner }
 }
 
@@ -40,7 +40,7 @@ interface ClickCellAction {
   cell: number; 
 }
 
-const clickCell = (row: number, cell: number): ClickCellAction => {
+export const clickCell = (row: number, cell: number): ClickCellAction => {
   return { type: CLICK_CELL, row, cell }
 }
 
@@ -117,7 +117,7 @@ const TicTacToe = () => {
       win = true;
     }
     if (win) {
-      dispatch({ type: SET_WINNER, winner: turn });
+      dispatch(setWinner(turn));
       dispatch({ type: RESET_GAME });
     } else {
       let all = true; // draw
@@ -130,6 +130,7 @@ const TicTacToe = () => {
       });
       if (all) {
         dispatch({ type: RESET_GAME });
+        dispatch(setWinner(''));
       } else {
         dispatch({ type: CHANGE_TURN });
       }
@@ -137,7 +138,7 @@ const TicTacToe = () => {
   }, [recentCell]) 
 
   const onClickTable = useCallback(() => {
-    dispatch({ type: SET_WINNER, winner: 'O' });
+    dispatch(setWinner('O'));
   }, []);
 
   return (

@@ -4,7 +4,8 @@ import Tr from './Tr';
 
 interface Props {
   tableData: string[][];
-  dispatch: Dispatch<any>
+  dispatch: Dispatch<any>;
+  onClick: () => void;
 }
 
 const Table: FunctionComponent<Props> = ({ tableData, dispatch }) => {
