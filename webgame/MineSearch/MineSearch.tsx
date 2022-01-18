@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { useEffect, useReducer, useMemo, Dispatch } from 'react';
+import { useEffect, useReducer, useMemo, Dispatch, createContext } from 'react';
+import Table from './Table';
+import Form from './Form';
 
 export const CODE = {
   MINE: -7,
@@ -11,6 +13,18 @@ export const CODE = {
   CLICKED_MINE: -6,
   OPENED: 0
 } as const;
+
+interface Context {
+  tableData: number[][],
+  halted: boolean,
+  dispatch: Dispatch<ReducerActions>
+}
+
+export const TableContext = createContext<Context>({
+  tableData: [],
+  halted: true,
+  dispatch: () => {}
+})
 
 interface ReducerState {
   tableData: number[][],
@@ -174,23 +188,13 @@ const reducer = (state = initialState, action: ReducerActions): ReducerState => 
         halted: false,
       }
     case OPEN_CELL: {
-       // immutable
-       // 클릭한 셀이 CODE.OPENED로 바뀌고 -> TD에 dispatch
-       const tableData = [...state.tableData];
-       //tableData[action.row] = [...state.tableData[action.row]];
-       //tableData[action.row][action.cell] = CODE.OPENED;
-       // 클릭한 칸만 불변성을 지키기 위해 새로운 객체로 만들어 주었는데
-       //  주변 칸도 함께 오픈하기 때문에 어떤 칸이 불변성이 안지켜질지 모르기 때문에 
-       // 모든칸을 새로운 객체로 만든다. 
-       tableData.forEach((row, i) => {
-          tableData[i] = [...state.tableData[i]];
-       });
-       // 한번 검사한 칸은 다시 검사하지 않도록 캐싱을 해준다. 
-       const checked: number[] = [];
-       // 열린 칸의 갯수를 센다 
-       let openedCount = 0;
-       // 클릭한 셀을 기준으로 주변칸을 검사하는 함수
-       const checkAround = (row: number, cell: number) => {
+      const tableData = [...state.tableData];
+      tableData.forEach((row, i) => {
+        tableData[i] = [...state.tableData[i]];
+      });
+      const checked: number[] = [];
+      let openedCount = 0;
+      const checkAround = (row: number, cell: number) => {
         // 클릭했을 때 자동으로 열리면 안되는 칸 필터링
         if([CODE.OPENED, CODE.FLAG_MINE, CODE.FLAG, CODE.QUESTION_MINE, CODE.QUESTION].includes(tableData[row][cell])){
           return;
@@ -214,7 +218,6 @@ const reducer = (state = initialState, action: ReducerActions): ReducerState => 
             tableData[row - 1][cell + 1]
           );
         }
-        // 좌우칸이 없는 경우는 undefined가 되어서 filter에서 걸러짐 
         around = around.concat(
           tableData[row][cell - 1], 
           tableData[row][cell + 1], 
@@ -327,5 +330,36 @@ const reducer = (state = initialState, action: ReducerActions): ReducerState => 
     }
     default :
       return state;
- }
+  }
 }
+
+const MineSearch = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { tableData, halted, timer, result } = state;
+
+  const value = useMemo(() => ({ tableData, halted, dispatch }), [tableData, halted])
+
+  useEffect(() => {
+    let timer: number; 
+    if(halted === false){
+      timer = window.setInterval(() => {
+          dispatch({ type: INCREMENT_TIMER });
+      }, 1000)
+    }
+    return () => {
+      clearInterval(timer);
+    }
+  },[halted])
+
+
+  return (
+    <TableContext.Provider value={value}>
+      <Form />
+      <div className="timer">{timer}</div>
+      <Table />
+      <div className="result">{result}</div>
+    </TableContext.Provider>
+  )
+}
+
+export default MineSearch;
