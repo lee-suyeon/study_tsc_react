@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useEffect, useReducer, useMemo, Dispatch, createContext } from 'react';
 import Table from './Table';
 import Form from './Form';
+import { ReducerActions, START_GAME, CLICK_MINE, OPEN_CELL, INCREMENT_TIMER, NORMALIZE_CELL, QUESTION_CELL, FLAG_CELL } from './action';
 
 export const CODE = {
   MINE: -7,
@@ -15,7 +16,7 @@ export const CODE = {
 } as const;
 
 interface Context {
-  tableData: number[][],
+  tableData: Codes[][],
   halted: boolean,
   dispatch: Dispatch<ReducerActions>
 }
@@ -26,8 +27,10 @@ export const TableContext = createContext<Context>({
   dispatch: () => {}
 })
 
+export type Codes = typeof CODE[keyof typeof CODE];
+
 interface ReducerState {
-  tableData: number[][],
+  tableData: Codes[][],
   data: {
     row: number,
     cell: number,
@@ -52,7 +55,7 @@ const initialState: ReducerState = {
   openedCount: 0
 }
 
-const plantMine = (row: number, cell: number, mine: number) => {
+const plantMine = (row: number, cell: number, mine: number): Codes[][] => {
   const candidate = Array(row*cell).fill(null).map((arr, i) => {
     return i;
   });
@@ -63,9 +66,9 @@ const plantMine = (row: number, cell: number, mine: number) => {
     shuffle.push(chosen);
   }
 
-  const data = [];
+  const data: Codes[][] = [];
   for(let i = 0; i < row; i++){
-    const rowData: number[] = [];
+    const rowData: Codes[] = [];
     data.push(rowData);
     for(let j = 0; j < cell; j++){
       rowData.push(CODE.NORMAL);
@@ -79,98 +82,6 @@ const plantMine = (row: number, cell: number, mine: number) => {
   }
   return data; 
 }
-
-export const START_GAME = 'START_GAME' as const;
-export const OPEN_CELL = 'OPEN_CELL' as const;
-export const CLICK_MINE = 'CLICK_MINE' as const;
-export const FLAG_CELL = 'FLAG_CELL' as const;
-export const QUESTION_CELL = 'QUESTION_CELL' as const;
-export const NORMALIZE_CELL = 'NORMALIZE_CELL' as const;
-export const INCREMENT_TIMER = 'INCREMENT_TIMER' as const;
-
-
-interface StartGameAction {
-  type: typeof START_GAME,
-  row: number,
-  cell: number,
-  mine: number
-}
-
-const startGame = (row: number, cell:number, mine: number): StartGameAction => {
-  return { 
-    type: START_GAME, row, cell, mine 
-  }
-}
-
-interface OpenCellAction {
-  type: typeof OPEN_CELL,
-  row: number,
-  cell: number
-}
-
-const openCell = (row: number, cell:number): OpenCellAction => {
-  return { 
-    type: OPEN_CELL, row, cell 
-  }
-}
-
-interface ClickMineAction {
-  type: typeof CLICK_MINE,
-  row: number,
-  cell: number,
-}
-
-const clickMine = (row: number, cell:number): ClickMineAction => {
-  return { 
-    type: CLICK_MINE, row, cell 
-  }
-}
-
-interface FlagCellAction {
-  type: typeof FLAG_CELL,
-  row: number,
-  cell: number,
-}
-
-const flagCell = (row: number, cell:number): FlagCellAction => {
-  return { 
-    type: FLAG_CELL, row, cell 
-  }
-}
-
-interface QuestionCellAction {
-  type: typeof QUESTION_CELL,
-  row: number,
-  cell: number,
-}
-
-const questionCell = (row: number, cell:number): QuestionCellAction => {
-  return { 
-    type: QUESTION_CELL, row, cell 
-  }
-}
-
-interface NormalizeCellAction {
-  type: typeof NORMALIZE_CELL,
-  row: number,
-  cell: number,
-}
-
-const nomalizeCell = (row: number, cell:number): NormalizeCellAction => {
-  return { 
-    type: NORMALIZE_CELL, row, cell 
-  }
-}
-
-interface IncrementTimerAction {
-  type: typeof INCREMENT_TIMER,
-}
-
-const incrementTimer = (row: number, cell:number): IncrementTimerAction => {
-  return { type: INCREMENT_TIMER }
-}
-
-type ReducerActions = StartGameAction | OpenCellAction | ClickMineAction | FlagCellAction | NormalizeCellAction | QuestionCellAction | IncrementTimerAction
 
 const reducer = (state = initialState, action: ReducerActions): ReducerState => {
   switch(action.type){
@@ -192,11 +103,11 @@ const reducer = (state = initialState, action: ReducerActions): ReducerState => 
       tableData.forEach((row, i) => {
         tableData[i] = [...state.tableData[i]];
       });
-      const checked: number[] = [];
+      const checked: string[] = [];
       let openedCount = 0;
       const checkAround = (row: number, cell: number) => {
         // 클릭했을 때 자동으로 열리면 안되는 칸 필터링
-        if([CODE.OPENED, CODE.FLAG_MINE, CODE.FLAG, CODE.QUESTION_MINE, CODE.QUESTION].includes(tableData[row][cell])){
+        if(([CODE.OPENED, CODE.FLAG_MINE, CODE.FLAG, CODE.QUESTION_MINE, CODE.QUESTION] as Codes[]).includes(tableData[row][cell])){
           return;
         }
         if(row < 0 || row >= tableData.length || cell < 0 || cell >= tableData[0].length){ //상하좌우가 칸이 없는 경우 필터링
@@ -230,7 +141,8 @@ const reducer = (state = initialState, action: ReducerActions): ReducerState => 
           );
         }
         // 주변에 설치된 지뢰의 수를 계산한 후 갯수 표시
-        const count = around.filter((v) => [CODE.MINE, CODE.FLAG_MINE, CODE.QUESTION_MINE].includes(v)).length;
+        const count = around.filter((v) => 
+          ([CODE.MINE, CODE.FLAG_MINE, CODE.QUESTION_MINE] as Codes[]).includes(v)).length as Codes;
         // *** 주변에 지뢰가 없고 또 그 주변에 지뢰가 없을 때 연결해서 오픈
         if(count === 0){ 
           const near = [];
